@@ -13,6 +13,14 @@ This directory contains a reusable map engine plus two generated, standalone Lea
 
 The maps show parcel outlines, assessment values, owners, location, land lines, building data, features, and other information available from the local GIS and Avitar property-record pages.
 
+## Licensing
+
+The original software in this project is licensed under the MIT License; see [LICENSE](LICENSE). This includes the map engine, build script, HTML shell, CSS, and other original source code.
+
+The assessment and GIS data files are separate from the software license. They come from Avitar, NH GRANIT/UNH, and other identified sources, and may be subject to their own terms, attribution requirements, or public-record limitations. The included PDFs and extracted source text are also not covered by the MIT license. Do not assume that the MIT license grants rights to redistribute third-party data.
+
+Leaflet and OpenStreetMap are third-party resources and retain their own licenses and attribution requirements.
+
 ## Run locally
 
 The generated demo files can be opened directly in a browser:
