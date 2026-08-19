@@ -2,16 +2,17 @@
 
 This software project generates two different scrollable, zoomable, click-able maps that allow exploration of property tax assessment data.
 
-It is currently configured with data scraped from Avitar Associates for Weare, NH, but there are instructions in this file on how to use LLM assistance to scrape data for your own town and customize this app.
+It is currently configured with data for Weare, Bedford, Goffstown, Hollis, Hudson, Manchester, Milford, and Peterborough, NH. Amherst is pending because its VGSI portal is temporarily offline. The data-acquisition instructions below explain how to use LLM assistance to scrape additional towns and customize this app.
 
-This directory contains a reusable map engine plus two generated, standalone Leaflet maps of New Hampshire parcels.
+This directory contains a reusable map engine plus generated, standalone Leaflet maps of New Hampshire parcels.
 
-- `map.html` is the maintainable HTTP/WordPress entry point. Use `?mode=assessment` or `?mode=neighborhood`.
+- `map.html` is the maintainable HTTP/WordPress entry point. Use an allowlisted `?town=` slug (`weare`, `bedford`, `goffstown`, `hollis`, `hudson`, `manchester`, `milford`, or `peterborough`), plus `mode=assessment`, `mode=neighborhood`, or `mode=quality`.
 - `dist/assessment-map.html` colors parcels by the percentage increase from 2025 to 2026 assessment.
 - `dist/neighborhood-map.html` colors parcels by Avitar neighborhood classification.
+- `dist/quality-map.html` colors improved parcels by building quality and shows a minimal quality popup.
 - `map.js` is the shared engine; `map.css` is the shared stylesheet.
 
-The maps show parcel outlines, assessment values, owners, location, land lines, building data, features, and other information available from the local GIS and Avitar property-record pages.
+The maps show parcel outlines, assessment values, owners, location, land lines, building data, features, and other information available from the local GIS and assessor property-record pages.
 
 ## Licensing
 
@@ -43,8 +44,12 @@ Then open:
 ```text
 http://localhost:8000/dist/assessment-map.html
 http://localhost:8000/dist/neighborhood-map.html
+http://localhost:8000/dist/quality-map.html
 http://localhost:8000/map.html?mode=assessment
 http://localhost:8000/map.html?mode=neighborhood
+http://localhost:8000/map.html?mode=quality
+http://localhost:8000/map.html?town=bedford&mode=assessment
+http://localhost:8000/map.html?town=goffstown&mode=assessment
 ```
 
 ## Host in WordPress
@@ -54,11 +59,11 @@ The maps are static HTML applications. They do not need a WordPress plugin, PHP,
 You can host them "on the metal" on any webserver and have nginx, Apache, or similar serve the files. Or, if you already have WordPress installed, you can serve them in an iframe inside a WordPress "page". Instructions on this follow.
 
 1. Create a directory such as `maps` in the public document root of the WordPress site.
-2. Upload `map.html`, `map.js`, `map.css`, and `data/assessment-parcels.geojson` there, preserving the `data/` subdirectory.
+2. Upload `map.html`, `map.js`, `map.css`, and the needed `data/<town>/assessment-parcels.geojson` files there, preserving the `data/<town>/` subdirectories.
 3. Visit the resulting URL, for example:
 
    ```text
-   https://example.com/maps/map.html?mode=assessment
+   https://example.com/maps/map.html?town=weare&mode=assessment
    ```
 
 4. In WordPress, edit the target page and add a **Custom HTML** block containing an iframe:
@@ -72,7 +77,7 @@ You can host them "on the metal" on any webserver and have nginx, Apache, or sim
    </iframe>
    ```
 
-Use `?mode=neighborhood` for the second map. Alternatively, upload the generated files from `dist/` if you want a single self-contained HTML artifact with embedded data. Uploading through the normal WordPress Media Library may reject `.html` files; server-side upload is the appropriate method. Make sure the site permits the iframe source and that the server serves `.html` as a normal text/HTML file.
+Use `town=bedford` to select Bedford and `mode=neighborhood` or `mode=quality` for the other views. Alternatively, upload `dist/map.html` if you want one self-contained artifact containing both towns, or upload the individual generated files from `dist/`. Uploading through the normal WordPress Media Library may reject `.html` files; server-side upload is the appropriate method. Make sure the site permits the iframe source and that the server serves `.html` as a normal text/HTML file.
 
 ## Data files
 
@@ -81,16 +86,28 @@ Use `?mode=neighborhood` for the second map. Alternatively, upload the generated
 | `map.html` | HTML shell | HTTP/WordPress entry point; selects the view with `?mode=`. |
 | `map.js` | JavaScript | Shared map engine. |
 | `map.css` | CSS | Shared map and legend styling. |
-| `data/assessment-parcels.geojson` | GeoJSON `FeatureCollection` | Canonical enriched parcel geometry and assessment dataset loaded by the engine. |
+| `data/weare/assessment-parcels.geojson` | GeoJSON `FeatureCollection` | Canonical Weare enriched parcel geometry and assessment dataset loaded by the engine. |
 | `dist/assessment-map.html` | Generated HTML + embedded GeoJSON | File-URL assessment-increase demo. |
 | `dist/neighborhood-map.html` | Generated HTML + embedded GeoJSON | File-URL neighborhood-rating demo. |
-| `build-maps.py` | Python 3 script | Regenerates both `dist/` demos from the canonical GeoJSON. |
-| `data/assessment-unmatched-avitar.csv` | CSV | Avitar records that did not match a GIS parcel. |
-| `data/assessment-unmatched-gis.csv` | CSV | GIS parcels that did not match an Avitar record. |
-| `data/parcels-*.geojson` | GeoJSON | Cached parcel geometry subsets and sample data. |
-| `data/parcels-count.json` | JSON | Count metadata for the parcel cache. |
-| `data/2026-uspap.pdf` | PDF | Avitar's 2026 USPAP/revaluation report. |
-| `data/2026-uspap.txt` | Plain text | Extracted text from the USPAP report for searching. |
+| `dist/quality-map.html` | Generated HTML + embedded GeoJSON | File-URL building-quality demo with minimal popups. |
+| `dist/map.html` | Generated HTML + both embedded datasets | One file-URL demo selected with `?town=` and `?mode=`. |
+| `build-maps.py` | Python 3 script | Regenerates all four `dist/` demos from the town datasets. |
+| `vgsi_hillsborough_scrape.mjs` | Node.js script | Locally crawls the six Hillsborough VGSI portals and joins their records to the configured GIS parcel layers. |
+| `data/weare/assessment-unmatched-avitar.csv` | CSV | Avitar records that did not match a GIS parcel. |
+| `data/weare/assessment-unmatched-gis.csv` | CSV | GIS parcels that did not match an Avitar record. |
+| `data/weare/parcels-*.geojson` | GeoJSON | Cached Weare parcel geometry subsets and sample data. |
+| `data/weare/parcels-count.json` | JSON | Count metadata for the Weare parcel cache. |
+| `data/weare/2026-uspap.pdf` | PDF | Avitar's 2026 USPAP/revaluation report. |
+| `data/weare/2026-uspap.txt` | Plain text | Extracted text from the USPAP report for searching. |
+| `data/bedford/assessment-parcels.geojson` | GeoJSON `FeatureCollection` | Bedford fork data, preserved in its original Vision schema. |
+| `data/bedford/assessment-unmatched-gis.csv` | CSV | Bedford GIS polygons with no Vision record. |
+| `data/bedford/assessment-unmatched-vision.csv` | CSV | Bedford Vision records with no GIS polygon. |
+| `data/goffstown/assessment-parcels.geojson` | GeoJSON `FeatureCollection` | Goffstown parcel geometry plus locally parsed Vision assessment, land, building, feature, and recent history data. |
+| `data/hollis/assessment-parcels.geojson` | GeoJSON `FeatureCollection` | Hollis parcel geometry plus locally parsed Vision assessment and property-record data. |
+| `data/hudson/assessment-parcels.geojson` | GeoJSON `FeatureCollection` | Hudson parcel geometry plus locally parsed Vision assessment and property-record data. |
+| `data/manchester/assessment-parcels.geojson` | GeoJSON `FeatureCollection` | Manchester parcel geometry plus locally parsed Vision assessment and property-record data. |
+| `data/milford/assessment-parcels.geojson` | GeoJSON `FeatureCollection` | Milford parcel geometry plus locally parsed Vision assessment and property-record data. |
+| `data/peterborough/assessment-parcels.geojson` | GeoJSON `FeatureCollection` | Peterborough parcel geometry plus locally parsed Vision assessment and property-record data. |
 
 Each normal GeoJSON feature has polygon geometry and properties including `pid`, `owner`, `location`, `acres`, `class`, `v2025`, `v2026`, `increase`, `increase_pct`, `neighborhood`, `land`, `building`, and `features`. The canonical parcel identifier is the 18-digit PID, such as `000404000085000000`.
 
@@ -98,27 +115,72 @@ The `land` array contains land-line details such as type, units, base rate, neig
 
 ### Source versus generated data
 
-The maintainable `map.html` loads `data/assessment-parcels.geojson` at runtime. The `dist/` files contain a copy of that data in `window.WEARE_DATA` so they remain usable via `file:///`. Changing a CSV or GeoJSON source does not change the generated demos until you run:
+The maintainable `map.html` loads `data/<town>/assessment-parcels.geojson` at runtime. The individual `dist/` files contain a copy of the Weare data in `window.WEARE_DATA`; `dist/map.html` contains the enabled town datasets in `window.TOWN_DATA`, so it remains usable via `file:///`. Changing a CSV or GeoJSON source does not change the generated demos until you run:
 
 ```bash
 python3 build-maps.py
 ```
 
-After changing source data, validate the GeoJSON, regenerate both demos, and test both the HTTP and `file:///` versions.
+After changing source data or map modes, validate the GeoJSON, regenerate all four demos, and test both the HTTP and `file:///` versions.
+
+The normalized building data includes `quality` and, where available from cached Avitar records, `condition`. The quality view maps Avitar's `AVG`/`EXC` codes to the report's B5-to-A8 scale; missing building data is shown in gray.
+
+Town and mode URL parameters are allowlisted by the map engine. Unknown values safely fall back to `town=weare` and `mode=assessment`; they are never interpolated into arbitrary filesystem paths. To add a town, add its data directory and explicitly add its name to the allowlist and build configuration.
+
+### Multiple towns
+
+Town-specific datasets belong in `data/<town>/` to prevent filename collisions. The Bedford files are preserved from `/tmp/bedford_map` without coercion or field renaming. They contain 7,630 Bedford polygons and use Vision Government Solutions, `v_prior`/`v_new`, `asr`, numeric Bedford neighborhood codes, and Bedford's own metadata. The shared engine now loads all eight completed town datasets for assessment, neighborhood, and quality views; Bedford's specialized assessment-to-sale ratio view remains fork-specific and is not exposed by the shared engine.
+
+### Data acquisition
+
+- **Amherst:** 2026-08-19; official NRPC parcel geometry was found, but `gis.vgsi.com/amherstnh` was temporarily offline for update, so no usable assessor dataset was published; retry the same local scraper when the portal returns.
+- **Bedford:** 2026-08-18; parcel geometry and assessment data from the Bedford Vision Government Solutions portal and the supplied fork data, preserved under `data/bedford/`.
+- **Goffstown:** 2026-08-19; parcel geometry and public GIS attributes from the town's ArcGIS parcel layer, joined by `D_GIS_CAMA_ID` to locally parsed Vision Government Solutions parcel pages at `gis.vgsi.com/goffstownnh`, stored under `data/goffstown/`.
+- **Hollis:** 2026-08-19; NRPC ArcGIS parcel geometry joined by normalized `LAB_PID` to locally parsed Vision Government Solutions pages at `gis.vgsi.com/hollisnh`, stored under `data/hollis/`.
+- **Hudson:** 2026-08-19; NRPC ArcGIS parcel geometry joined by normalized `LAB_PID` to locally parsed Vision Government Solutions pages at `gis.vgsi.com/hudsonnh`, stored under `data/hudson/`.
+- **Manchester:** 2026-08-19; official City of Manchester ArcGIS parcel geometry joined by `VisionPID` to locally parsed Vision Government Solutions pages at `gis.vgsi.com/manchesternh`, stored under `data/manchester/`.
+- **Milford:** 2026-08-19; NRPC ArcGIS parcel geometry joined by normalized `LAB_PID` to locally parsed Vision Government Solutions pages at `gis.vgsi.com/milfordnh`, stored under `data/milford/`.
+- **Peterborough:** 2026-08-19; official `Pboro_RE_Dec2025` ArcGIS parcel geometry joined by normalized `PENTAMATIO` to locally parsed Vision Government Solutions pages at `gis.vgsi.com/peterboroughnh`, stored under `data/peterborough/`.
+- **Weare:** 2026-08-18; parcel geometry from NH GRANIT/UNH and assessment/property details from the Avitar portal, stored under `data/weare/`.
 
 ## Refreshing data with ChatGPT
 
 The following prompts are useful starting points. Replace URLs, years, and filenames as needed.
 
-### Full refresh from GIS and Avitar
+### LLM scraping contract
+
+An LLM doing a scrape must write town data under a town-specific directory:
 
 ```text
-In the nh_property_assessment project, scrape the current <TOWNNAME> GIS parcel geometries and the Avitar property records for the requested map numbers. Match records by the canonical 18-digit PID. Preserve all existing fields and add the new assessment year as v2027 (or the requested year), increase, and increase_pct. Produce:
+data/<town>/assessment-parcels.geojson
+data/<town>/assessment-unmatched-gis.csv
+data/<town>/assessment-unmatched-<assessor>.csv
+```
 
-1. a validated FeatureCollection named data/assessment-parcels.geojson;
-2. unmatched-avitar and unmatched-gis CSV reports;
-3. run `python3 build-maps.py` to regenerate both `dist/` demos;
-4. verify `map.html?mode=assessment` and `map.html?mode=neighborhood` against the same external dataset.
+Use a lowercase filesystem slug such as `weare` or `bedford`. Never write a new town's files into the shared `data/` directory, and never overwrite another town's files. Preserve raw scrape artifacts separately when they are needed for auditing.
+
+The canonical parcel file must be a GeoJSON `FeatureCollection`. Each feature must have valid polygon geometry and properties containing, where the source provides them:
+
+- `pid` or another documented stable parcel identifier, plus `displayid`/`objectid` when available
+- `owner`, `owner2`, `location` or `streetaddress`, `acres`, and `class`
+- prior and new assessment values, preferably as `v_prior`, `v_new`, `v_prior_label`, and `v_new_label`; use explicit year fields such as `v2025`/`v2026` when those years are genuinely known
+- derived `increase` and `increase_pct` values, calculated from the stored prior/new values
+- `neighborhood`, `land`, `building`, and `features` when available
+
+The top-level GeoJSON should include `metadata` with the town, source URLs, scrape date, geometry source, assessment source, join key, feature count, matched count, and unmatched counts. Do not invent values for missing fields. Preserve source-specific fields such as Bedford's `asr` and Vision's numeric neighborhood codes.
+
+For Bedford specifically, the assessment source is [Vision Government Solutions](https://gis.vgsi.com/bedfordnh/Search.aspx); the parcel geometry source and join key must also be recorded in `metadata`.
+
+### Full refresh from GIS and assessor site
+
+```text
+In the nh_property_assessment project, scrape the current <TOWNNAME> GIS parcel geometries and the town's assessor property-record site. For Bedford, use https://gis.vgsi.com/bedfordnh/Search.aspx. Match records using the documented GIS/assessor join key; do not guess by address when an authoritative parcel identifier exists. Preserve all existing fields and add the requested prior/new assessment values plus derived increase fields. Produce:
+
+1. `data/<town>/assessment-parcels.geojson` following the canonical contract above;
+2. `data/<town>/assessment-unmatched-gis.csv` and an assessor-specific unmatched CSV;
+3. metadata recording sources, dates, join key, counts, and schema details;
+4. a dry-run report of matched, unmatched, changed, and suspicious records before replacement;
+5. after approval, run `python3 build-maps.py` if the town is enabled in the build configuration.
 
 Do not discard existing land, building, features, neighborhood, or popup fields. Write backups before replacing files, validate JSON, verify the feature count, and test both HTML files.
 ```
@@ -126,22 +188,24 @@ Do not discard existing land, building, features, neighborhood, or popup fields.
 ### Assessment-only refresh using existing geometry
 
 ```text
-Using the existing data/assessment-parcels.geojson geometry, scrape the requested year's Avitar assessments and match by 18-digit PID. Update only the year-specific assessment fields and derived increase fields; preserve geometry and all unrelated popup data. Run `python3 build-maps.py` so the file-URL demos match the external GeoJSON. Report matched, unmatched, and changed counts before replacing anything.
+Using the existing `data/<town>/assessment-parcels.geojson` geometry, scrape the requested assessment data from the documented assessor source and match using the town's documented join key. Update only the assessment-year fields and derived increase fields; preserve geometry and all unrelated popup data. Write the result back under the same `data/<town>/` directory. Report matched, unmatched, changed, and suspicious counts before replacing anything.
 ```
 
 ### Validate a replacement dataset
 
 ```text
-Audit the replacement files in nh_property_assessment. Check that every GeoJSON feature has valid polygon geometry and a valid 18-digit pid where present. Do not assume PID uniqueness: multipart GIS geometries may legitimately repeat a PID; report duplicates and check `objectid`/feature identity instead. Verify that v2025/v2026/increase/increase_pct agree arithmetically, and that the external GeoJSON and both generated HTML demos contain the same parcel count and PID set. Check for malformed land/building/features data and list discrepancies without silently fixing them.
+Audit the replacement files in `nh_property_assessment`. Check that every GeoJSON feature has valid polygon geometry and a valid documented parcel identifier where present. Do not assume PID uniqueness: multipart GIS geometries may legitimately repeat a PID; report duplicates and check `objectid`/feature identity instead. Verify that prior/new assessment fields and `increase`/`increase_pct` agree arithmetically, and that generated demos contain the same parcel counts and identifier set as the source GeoJSON. Check for malformed land/building/features data, metadata/source provenance, and unmatched reports; list discrepancies without silently fixing them.
 ```
 
 ### Deploy a refreshed map to WordPress
 
 ```text
-The refreshed map files are in nh_property_assessment. Verify the shared HTTP version and both generated `dist/` demos locally, then copy `map.html`, `map.js`, `map.css`, and `data/assessment-parcels.geojson` to the WordPress site's public `/maps/` directory. Do not upload the large audit/cache files unless requested. Confirm the public URLs return the new map and provide the iframe HTML for the WordPress Custom HTML block.
+The refreshed map files are in `nh_property_assessment`. Verify the shared HTTP version and all generated `dist/` demos locally, then copy `map.html`, `map.js`, `map.css`, and the needed `data/<town>/assessment-parcels.geojson` files to the WordPress site's public `/maps/` directory. Do not upload the large audit/cache files unless requested. Confirm the public URLs return the new maps and provide the iframe HTML for the WordPress Custom HTML block.
 ```
 
 When asking ChatGPT to scrape, specify the desired map numbers, assessment years, source URLs, and whether existing records must be preserved. For a large refresh, ask for a dry-run report first; compare counts and a few known PIDs before authorizing replacement.
+
+Keep this README current whenever files, modes, data fields, sources, or deployment steps change.
 
 ## Notes and limitations
 
