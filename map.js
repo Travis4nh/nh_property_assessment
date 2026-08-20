@@ -1,7 +1,7 @@
 /* Shared Weare parcel map engine. Data may be embedded for file:/// demos or fetched over HTTP. */
 (async function () {
   const params = new URLSearchParams(location.search);
-  const allowedTowns = new Set(window.AVAILABLE_TOWNS || ['weare', 'bedford', 'goffstown', 'hollis', 'hudson', 'manchester', 'milford', 'peterborough']);
+  const allowedTowns = new Set(window.AVAILABLE_TOWNS || ['amherst','bedford','berlin','bow','bridgewater','claremont','durham','epping','exeter','fremont','goffstown','grantham','hampton','hollis','hooksett','hudson','jaffrey','keene','laconia','lebanon','lincoln','londonderry','lyme','manchester','meredith','milford','newington','newmarket','north_hampton','pelham','peterborough','portsmouth','raymond','rye','salem','seabrook','strafford','weare']);
   const requestedTown = (window.TOWN || params.get('town') || 'weare').toLowerCase();
   const town = allowedTowns.has(requestedTown) ? requestedTown : 'weare';
   const allowedModes = new Set(['assessment', 'neighborhood', 'quality']);

@@ -1,0 +1,7 @@
+# Generated standalone map artifacts. Keep them locally or publish them as
+# release/deployment artifacts; rebuild with build-maps.py. The whole tree is
+# ignored so new towns or future map variants cannot be staged accidentally.
+/dist/
+
+# Generated join diagnostics; the GeoJSON inputs remain tracked.
+/data/*/assessment-unmatched-*.csv

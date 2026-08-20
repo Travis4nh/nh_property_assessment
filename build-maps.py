@@ -5,14 +5,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 TOWNS = {
-    'weare': json.loads((ROOT / 'data/weare/assessment-parcels.geojson').read_text()),
-    'bedford': json.loads((ROOT / 'data/bedford/assessment-parcels.geojson').read_text()),
-    'goffstown': json.loads((ROOT / 'data/goffstown/assessment-parcels.geojson').read_text()),
-    'hollis': json.loads((ROOT / 'data/hollis/assessment-parcels.geojson').read_text()),
-    'hudson': json.loads((ROOT / 'data/hudson/assessment-parcels.geojson').read_text()),
-    'manchester': json.loads((ROOT / 'data/manchester/assessment-parcels.geojson').read_text()),
-    'milford': json.loads((ROOT / 'data/milford/assessment-parcels.geojson').read_text()),
-    'peterborough': json.loads((ROOT / 'data/peterborough/assessment-parcels.geojson').read_text()),
+    p.parent.name: json.loads(p.read_text())
+    for p in sorted((ROOT / 'data').glob('*/assessment-parcels.geojson'))
+    if json.loads(p.read_text()).get('features')
 }
 DATA = TOWNS['weare']
 PAYLOAD = json.dumps(DATA, separators=(',', ':'))
@@ -42,7 +37,7 @@ out.mkdir(exist_ok=True)
 <link rel="stylesheet" href="../map.css"></head>
 <body><div id="map"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>window.AVAILABLE_TOWNS=['weare','bedford','goffstown','hollis','hudson','manchester','milford','peterborough']; window.TOWN_DATA={ALL_PAYLOAD};</script>
+<script>window.AVAILABLE_TOWNS={list(TOWNS)!r}; window.TOWN_DATA={ALL_PAYLOAD};</script>
 <script src="../map.js"></script></body></html>
 ''')
 print(f'generated {len(DATA["features"]):,} parcels')

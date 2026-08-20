@@ -2,14 +2,26 @@
 
 This software project generates two different scrollable, zoomable, click-able maps that allow exploration of property tax assessment data.
 
-It is currently configured with data for Weare, Bedford, Goffstown, Hollis, Hudson, Manchester, Milford, and Peterborough, NH. Amherst is pending because its VGSI portal is temporarily offline. The data-acquisition instructions below explain how to use LLM assistance to scrape additional towns and customize this app.
+It is currently configured with data for 39 town datasets, including Weare. Three listed provider towns remain pending because the available statewide parcel identifiers do not reliably join to their VGSI map/lot identifiers. The data-acquisition instructions below explain how to use LLM assistance to scrape additional towns and customize this app.
 
 This directory contains a reusable map engine plus generated, standalone Leaflet maps of New Hampshire parcels.
 
-- `map.html` is the maintainable HTTP/WordPress entry point. Use an allowlisted `?town=` slug (`weare`, `bedford`, `goffstown`, `hollis`, `hudson`, `manchester`, `milford`, or `peterborough`), plus `mode=assessment`, `mode=neighborhood`, or `mode=quality`.
+- `map.html` is the maintainable HTTP/WordPress entry point. Use an allowlisted `?town=` slug from the `data/` directories, plus `mode=assessment`, `mode=neighborhood`, or `mode=quality`.
 - `dist/assessment-map.html` colors parcels by the percentage increase from 2025 to 2026 assessment.
 - `dist/neighborhood-map.html` colors parcels by Avitar neighborhood classification.
 - `dist/quality-map.html` colors improved parcels by building quality and shows a minimal quality popup.
+
+### Build artifacts
+
+The files under `dist/` are generated artifacts and are intentionally ignored by Git. Run `python3 build-maps.py` after changing source code or data; the generated HTML remains available locally for `file:///` testing and can be copied to a web server or attached to a release. The repository stores the build script and source data, not the large all-town HTML bundle.
+
+For a clean checkout, regenerate the local maps with:
+
+```sh
+python3 build-maps.py
+```
+
+Do not manually commit generated files under `dist/`. For distribution, use a release asset or deploy the generated files to the web host.
 - `map.js` is the shared engine; `map.css` is the shared stylesheet.
 
 The maps show parcel outlines, assessment values, owners, location, land lines, building data, features, and other information available from the local GIS and assessor property-record pages.
@@ -133,14 +145,47 @@ Town-specific datasets belong in `data/<town>/` to prevent filename collisions. 
 
 ### Data acquisition
 
-- **Amherst:** 2026-08-19; official NRPC parcel geometry was found, but `gis.vgsi.com/amherstnh` was temporarily offline for update, so no usable assessor dataset was published; retry the same local scraper when the portal returns.
+- **Amherst:** 2026-08-19; statewide NH parcel geometry joined to locally parsed Vision pages at `gis.vgsi.com/amherstnh`, stored under `data/amherst/`.
 - **Bedford:** 2026-08-18; parcel geometry and assessment data from the Bedford Vision Government Solutions portal and the supplied fork data, preserved under `data/bedford/`.
+- **Berlin:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/berlinnh`, stored under `data/berlin/`.
+- **Bow:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/bownh`, stored under `data/bow/`.
+- **Bridgewater:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/bridgewaternh`, stored under `data/bridgewater/`.
+- **Charlestown:** 2026-08-19; statewide parcel geometry was obtained, but its statewide identifiers did not reliably match the town's VGSI map/lot identifiers; pending a town-specific join.
+- **Claremont:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/claremontnh`, stored under `data/claremont/`.
+- **Concord:** 2026-08-19; Concord's official ArcGIS parcel layer was joined directly by `VISION_ID` to locally parsed Vision pages at `gis.vgsi.com/concordnh`, stored under `data/concord/`.
+- **Derry:** 2026-08-19; statewide parcel geometry was obtained, but its statewide identifiers did not reliably match the town's VGSI map/lot identifiers; pending a town-specific join.
+- **Durham:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/durhamnh`, stored under `data/durham/`.
+- **Epping:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/eppingnh`, stored under `data/epping/`.
+- **Exeter:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/exeternh`, stored under `data/exeter/`.
+- **Fremont:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/fremontnh`, stored under `data/fremont/`.
 - **Goffstown:** 2026-08-19; parcel geometry and public GIS attributes from the town's ArcGIS parcel layer, joined by `D_GIS_CAMA_ID` to locally parsed Vision Government Solutions parcel pages at `gis.vgsi.com/goffstownnh`, stored under `data/goffstown/`.
+- **Grantham:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/granthamnh`, stored under `data/grantham/`.
+- **Greenland:** 2026-08-19; statewide parcel geometry was obtained, but its statewide identifiers did not reliably match the town's VGSI map/lot identifiers; pending a town-specific join.
+- **Hampton:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/hamptonnh`, stored under `data/hampton/`.
 - **Hollis:** 2026-08-19; NRPC ArcGIS parcel geometry joined by normalized `LAB_PID` to locally parsed Vision Government Solutions pages at `gis.vgsi.com/hollisnh`, stored under `data/hollis/`.
+- **Hooksett:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/hooksettnh`, stored under `data/hooksett/`.
 - **Hudson:** 2026-08-19; NRPC ArcGIS parcel geometry joined by normalized `LAB_PID` to locally parsed Vision Government Solutions pages at `gis.vgsi.com/hudsonnh`, stored under `data/hudson/`.
+- **Jaffrey:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/jaffreynh`, stored under `data/jaffrey/`.
+- **Keene:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/keenenh`, stored under `data/keene/`.
+- **Laconia:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/laconianh`, stored under `data/laconia/`.
+- **Lebanon:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/lebanonnh`, stored under `data/lebanon/`; some assessor requests were throttled.
+- **Lincoln:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/lincolnnh`, stored under `data/lincoln/`.
+- **Londonderry:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/londonderrynh`, stored under `data/londonderry/`.
+- **Lyme:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/lymenh`, stored under `data/lyme/`.
 - **Manchester:** 2026-08-19; official City of Manchester ArcGIS parcel geometry joined by `VisionPID` to locally parsed Vision Government Solutions pages at `gis.vgsi.com/manchesternh`, stored under `data/manchester/`.
 - **Milford:** 2026-08-19; NRPC ArcGIS parcel geometry joined by normalized `LAB_PID` to locally parsed Vision Government Solutions pages at `gis.vgsi.com/milfordnh`, stored under `data/milford/`.
+- **Meredith:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/meredithnh`, stored under `data/meredith/`.
+- **Newmarket:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/newmarketnh`, stored under `data/newmarket/`.
+- **Newington:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/newingtonnh`, stored under `data/newington/`.
+- **North Hampton:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/northhamptonnh`, stored under `data/north_hampton/`.
+- **Pelham:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/pelhamnh`, stored under `data/pelham/`.
 - **Peterborough:** 2026-08-19; official `Pboro_RE_Dec2025` ArcGIS parcel geometry joined by normalized `PENTAMATIO` to locally parsed Vision Government Solutions pages at `gis.vgsi.com/peterboroughnh`, stored under `data/peterborough/`.
+- **Portsmouth:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/portsmouthnh`, stored under `data/portsmouth/`.
+- **Raymond:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/raymondnh`, stored under `data/raymond/`.
+- **Rye:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/ryenh`, stored under `data/rye/`.
+- **Salem:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/salemnh`, stored under `data/salem/`.
+- **Seabrook:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/seabrooknh`, stored under `data/seabrook/`.
+- **Strafford:** 2026-08-19; statewide NH parcel geometry joined by normalized `displayid` to locally parsed Vision pages at `gis.vgsi.com/straffordnh`, stored under `data/strafford/`.
 - **Weare:** 2026-08-18; parcel geometry from NH GRANIT/UNH and assessment/property details from the Avitar portal, stored under `data/weare/`.
 
 ## Refreshing data with ChatGPT
