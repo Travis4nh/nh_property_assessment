@@ -6,7 +6,14 @@ It is currently configured with data for 39 town datasets, including Weare. Thre
 
 This directory contains a reusable map engine plus generated, standalone Leaflet maps of New Hampshire parcels.
 
-- `map.html` is the maintainable HTTP/WordPress entry point. Use an allowlisted `?town=` slug from the `data/` directories, plus `mode=assessment`, `mode=neighborhood`, or `mode=quality`.
+- `map.html` is the maintainable HTTP/WordPress entry point. Use an allowlisted `?town=` slug from the `data/` directories, plus `mode=assessment`, `mode=neighborhood`, `mode=quality`, `mode=ratio`, or `mode=history`.
+  - `mode=ratio` colours each parcel by current assessed value ÷ its most recent arm's-length qualified sale, for datasets
+    carrying a `ratio_2026` property.
+  - `mode=history` colours each parcel by year-over-year change and adds a year slider, for datasets carrying a per-parcel
+    `value_history` array of `{year, total}`. Deep-link a single year with `?year=2013`. A parcel not assessed in either the
+    selected year or the year before it is drawn grey rather than as 0% change.
+  - Both views explain themselves in the map note when the loaded dataset carries neither property, instead of rendering an
+    unexplained all-grey map.
 - `dist/assessment-map.html` colors parcels by the percentage increase from 2025 to 2026 assessment.
 - `dist/neighborhood-map.html` colors parcels by Avitar neighborhood classification.
 - `dist/quality-map.html` colors improved parcels by building quality and shows a minimal quality popup.
@@ -59,6 +66,8 @@ http://localhost:8000/dist/neighborhood-map.html
 http://localhost:8000/dist/quality-map.html
 http://localhost:8000/map.html?mode=assessment
 http://localhost:8000/map.html?mode=neighborhood
+http://localhost:8000/map.html?mode=history
+http://localhost:8000/map.html?mode=history&year=2013
 http://localhost:8000/map.html?mode=quality
 http://localhost:8000/map.html?town=bedford&mode=assessment
 http://localhost:8000/map.html?town=goffstown&mode=assessment

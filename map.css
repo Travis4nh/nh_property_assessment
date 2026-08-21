@@ -8,3 +8,5 @@ body { font-family: Arial, sans-serif; }
 .legend { padding: 10px 12px; line-height: 1.45; }
 .legend i { display: inline-block; width: 16px; height: 12px; margin-right: 6px; }
 .note { padding: 8px 10px; max-width: 360px; font-size: 12px; }
+.yearslider { line-height: 1.6; }
+.yearslider input[type="range"] { margin: 4px 0; vertical-align: middle; }

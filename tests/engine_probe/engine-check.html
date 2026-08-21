@@ -1,0 +1,38 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>engine check</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><link rel="stylesheet" href="../../map.css">
+<script>
+// This page lives under tests/engine_probe/, so point map.js at the repo-root data directory.
+window.DATA_URL='/data/'+((new URLSearchParams(location.search).get('town'))||'weare').toLowerCase().replace(/[^a-z_]/g,'')+'/assessment-parcels.geojson';
+window.__errs=[];
+window.addEventListener('error',e=>window.__errs.push('error: '+(e.message||e)));
+window.addEventListener('unhandledrejection',e=>window.__errs.push('rejection: '+(e.reason&&e.reason.message||e.reason)));
+const _ce=console.error.bind(console); console.error=(...a)=>{window.__errs.push('console.error: '+a.map(String).join(' ')); _ce(...a);};
+</script></head>
+<body><div id="map"></div><div id="probe"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="../../map.js"></script>
+<script>
+(function poll(n){
+  const paths=[...document.querySelectorAll('#map path')];
+  const legend=document.querySelector('.legend'); const note=document.querySelector('.note');
+  const ready = paths.length>0 && legend && note;
+  if(!ready && n<60){ return setTimeout(()=>poll(n+1),400); }
+  let popup='NO-POPUP';
+  try { if(paths.length){ paths[Math.floor(paths.length/2)].dispatchEvent(new MouseEvent('click',{bubbles:true})); } } catch(e){ window.__errs.push('click: '+e.message); }
+  setTimeout(()=>{
+    const pp=document.querySelector('.leaflet-popup-content'); if(pp) popup=pp.innerText.replace(/\s+/g,' ').slice(0,900);
+    const fills=paths.map(p=>p.getAttribute('fill')||'');
+    const counts={}; fills.forEach(f=>counts[f]=(counts[f]||0)+1);
+    const d=document.getElementById('probe');
+    d.setAttribute('data-paths',String(paths.length));
+    d.setAttribute('data-errors',JSON.stringify(window.__errs));
+    d.setAttribute('data-fills',JSON.stringify(counts));
+    d.setAttribute('data-legend',legend?legend.innerText.replace(/\s+/g,' '):'NO-LEGEND');
+    d.setAttribute('data-note',note?note.innerText.replace(/\s+/g,' '):'NO-NOTE');
+    d.setAttribute('data-popup',popup);
+    d.setAttribute('data-failtext',(document.getElementById('map').textContent||'').includes('Map failed')?'FAILED':'ok');
+    d.setAttribute('data-done','1');
+  },800);
+})(0);
+</script></body></html>
